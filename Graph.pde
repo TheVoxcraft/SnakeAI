@@ -1,7 +1,7 @@
 class Graph {
     ArrayList<Float> data = new ArrayList<>();
     int boundingBoxHeight = 100;
-    int maxDataValue = 50;
+    int maxDataValue = 70;
     color col;
 
     Graph(float col_h){
@@ -16,7 +16,7 @@ class Graph {
         int xOffset = width - data.size();
         stroke(col);
         for(int i = max(0, data.size()-width); i < data.size(); i++){
-            point(xOffset + i, maxDataValue + data.get(i));
+            point(xOffset + i, maxDataValue - data.get(i));
         }
         noStroke();
     }

@@ -15,6 +15,7 @@ SnakeScene followingBestScene;
 
 boolean DEBUGGING = true;
 Graph debugBestScoreGraph;
+Graph debugAvgScoreGraph;
 
 ArrayList<SnakeScene> scenes = new ArrayList<>();
 
@@ -33,6 +34,7 @@ void setup(){
   followingBestScene.agent.col = color(25, 100, 100, 100);
 
   debugBestScoreGraph = new Graph(0);
+  debugAvgScoreGraph = new Graph(30);
 }
 
 void draw(){
@@ -89,14 +91,20 @@ void nextGeneration(){
 
   // Make new population with best half of population (Reproduction & TODO: Crossover)
   ArrayList<SnakeScene> newScenes = new ArrayList<>();
+  float totalScore = 0;
   for(int i = 0; i < scenes.size()/2; i++){
     SnakeScene old = scenes.get(i);
+    totalScore += old.finalScore;
     Network newBrain = old.agent.brain.Reproduce();
     SnakeScene newScene = new SnakeScene(newBrain);
     newScenes.add(newScene);
   }
   followingBestScene = newScenes.get(0); // Gets best snake from previous generation
   followingBestScene.agent.col = color(66, 100, 100, 100);
+  
+  float avgScore = totalScore/(POPULATION_SIZE*.5);
+  println("Avg: "+avgScore);
+  debugAvgScoreGraph.add(avgScore);
 
   // Make completely new half
   for(int i = 0; i < scenes.size()/2; i++){
@@ -110,6 +118,7 @@ void nextGeneration(){
 
 void drawDebugScoreGraph(){
    debugBestScoreGraph.draw();
+   debugAvgScoreGraph.draw();
 }
 
 void drawDebugTextEvolution(){
