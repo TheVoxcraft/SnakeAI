@@ -16,11 +16,12 @@ SnakeScene followingBestScene;
 boolean DEBUGGING = true;
 Graph debugBestScoreGraph;
 Graph debugAvgScoreGraph;
+String useMode = "Default";
 
 ArrayList<SnakeScene> scenes = new ArrayList<>();
 
 void setup(){
-  frameRate(100);
+  frameRate(60);
   size(800, 800);
   colorMode(HSB, 100);
   MAX_BOARD_WIDTH = (int) width / GRID_SIZE;
@@ -129,6 +130,7 @@ void drawDebugTextEvolution(){
   t.addText("PrevBestSnake.score: "+followingBestScene.score);
   t.addText("PrevBestSnake.health: "+followingBestScene.healthTicks);
   t.addText("PrevBestSnake.isDead: "+followingBestScene.gameover);
+  t.addText("Use Mode: "+useMode);
   fill(0, 0, 90, 90);
   t.draw();
 }
@@ -145,20 +147,21 @@ void drawDebugTextScene(SnakeScene scene){
   t.draw();
 }
 
-/* Debug: Player input
+
 void keyPressed(){
-  if(key == CODED){
-    if (keyCode == LEFT){
-      scene.agent.changeDirection(-1, 0);
-    }
-    if(keyCode == RIGHT){
-      scene.agent.changeDirection(1, 0);
-    }
-    if (keyCode == UP){
-      scene.agent.changeDirection(0, -1);
-    }
-    if(keyCode == DOWN){
-      scene.agent.changeDirection(0, 1);
-    }
+  if (key == 'a'){
+    useMode = "Default";
+    SNAKE_UPDATE_RATE = 60;
+    BATCH_SNAKE_UPDATES = 1;
   }
-}*/
+  if(key == 's'){
+    useMode = "Showcase";
+    SNAKE_UPDATE_RATE = 25;
+    BATCH_SNAKE_UPDATES = 1;
+  }
+  if (key == 'd'){
+    useMode = "Hypertraining";
+    SNAKE_UPDATE_RATE = 60;
+    BATCH_SNAKE_UPDATES = 60;
+  }
+}
