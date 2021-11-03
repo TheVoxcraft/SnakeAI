@@ -1,8 +1,12 @@
+import java.lang.Float;
+
 class SnakeScene implements Comparable<SnakeScene>{
 
     float finalScore;
     int score = 0;
     int ticks = 0;
+
+    int healthTicks = 150;
 
     Snake agent;
     PVector foodPos = new PVector(10, 30);
@@ -31,24 +35,29 @@ class SnakeScene implements Comparable<SnakeScene>{
 
     void draw(){
         noStroke();
-
-        // Draw food
-        fill(agent.col);
-        rect(GRID_SIZE * foodPos.x, GRID_SIZE * foodPos.y, GRID_SIZE, GRID_SIZE);
-
-        // Draw snake
-        agent.draw();
         
+        if(!gameover){
+            // Draw food
+            fill(agent.col);
+            rect(GRID_SIZE * foodPos.x, GRID_SIZE * foodPos.y, GRID_SIZE, GRID_SIZE);
+
+            // Draw snake
+            agent.draw();
+        }
     }
 
     void tick(){
         if(!gameover){
             ticks++;
+            healthTicks--;
             agent.setInputs(foodPos);
             agent.decide();
             agent.update();
             checkIfAgentScored();
             checkIfAgentCollided();
+            if(healthTicks <= 0){
+                gameover = true;
+            }
         }
     }
 
@@ -58,6 +67,7 @@ class SnakeScene implements Comparable<SnakeScene>{
         if(agent.position.dist(foodPos) < 0.001){
             randomizeFood();
             score++;
+            healthTicks += 150;
             agent.extendTail();
         }
     }
@@ -76,12 +86,16 @@ class SnakeScene implements Comparable<SnakeScene>{
     }
 
     void calculateFinalScore(){
-        finalScore = score**2 + ticks/10f;
+        finalScore = pow(2*score, 2) + ticks/100f;
     }
 
     @Override
     public int compareTo(SnakeScene other) {
-        return finalScore.compareTo(other.finalScore);
+        calculateFinalScore();
+        other.calculateFinalScore();
+        Float s1 = (Float) finalScore;
+        Float s2 = (Float) other.finalScore;
+        return s1.compareTo(s2);
     }
     
 }

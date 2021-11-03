@@ -1,19 +1,24 @@
-int POPULATION_SIZE = 20;
+import java.util.*;
+
+int POPULATION_SIZE = 300;
 
 int GRID_SIZE = 20;
 int MAX_BOARD_WIDTH;
 int MAX_BOARD_HEIGHT;
 
-float SNAKE_UPDATE_RATE = 10; // snake updates per second
-int BATCH_SNAKE_UPDATES = 1;
+float SNAKE_UPDATE_RATE = 60; // snake updates per second
+int BATCH_SNAKE_UPDATES = 3;
 float elapsedTimeSinceUpdate = Float.MAX_VALUE;
+int currentGeneration = 0;
+
+SnakeScene followingBestScene;
 
 boolean DEBUGGING = true;
 
 ArrayList<SnakeScene> scenes = new ArrayList<>();
 
 void setup(){
-  frameRate(60);
+  frameRate(90);
   size(800, 800);
   colorMode(HSB, 100);
   MAX_BOARD_WIDTH = (int) width / GRID_SIZE;
@@ -22,6 +27,9 @@ void setup(){
   for(int i = 0; i < POPULATION_SIZE; i++){
     scenes.add(new SnakeScene());
   }
+
+  followingBestScene = scenes.get(0);
+  followingBestScene.agent.col = color(25, 100, 100, 100);
 }
 
 void draw(){
@@ -41,6 +49,7 @@ void draw(){
 
   
   if(DEBUGGING){
+    drawDebugTextEvolution();
     // drawDebugText(scene);
   }
 }
@@ -58,25 +67,52 @@ void updateAllScenes(){
     sc.tick();
     if(!sc.gameover) allDead = false; // Someones still alive
   }
-  if(allDead){
-    println("All dead snakes");
 
-    // TODO:
-    // Sort snakes after score and ticks alive
-    // Java 8 Alternative: users.sort(Comparator.comparing(User::getCreatedOn).reversed());
-    ArrayList<SnakeScene> newScenes = new ArrayList<>();
-    Collections.sort(scenes);
-    Collections.reverse(scenes);
-    for(int i = 0; i < scenes.size()/2; i++){
-      SnakeScene old = scenes.get(i);
-      Network newBrain = old.brain.Reproduce();
-      SnakeScene newScene = new SnakeScene();
-
-    }
-    // Make new population with best half of population (Reproduction & Crossover)
-    // Make completely new half
-    // Reset scenes
+  if(allDead){ // All snakes dead, generate next generation
+    nextGeneration();
   }
+}
+
+
+void nextGeneration(){
+  currentGeneration++;
+  // Sort snakes after score and ticks alive, DESC
+  Collections.sort(scenes); // Java 8 Alternative : scenes.sort(Comparator.comparing(SnakeScene::finalScore).reversed());
+  Collections.reverse(scenes);
+
+  println("G"+currentGeneration+" - Best score: "+scenes.get(0).finalScore);
+
+  // Make new population with best half of population (Reproduction & TODO: Crossover)
+  ArrayList<SnakeScene> newScenes = new ArrayList<>();
+  for(int i = 0; i < scenes.size()/2; i++){
+    SnakeScene old = scenes.get(i);
+    Network newBrain = old.agent.brain.Reproduce();
+    SnakeScene newScene = new SnakeScene(newBrain);
+    newScenes.add(newScene);
+  }
+  followingBestScene = newScenes.get(0); // Gets best snake from previous generation
+  followingBestScene.agent.col = color(66, 100, 100, 100);
+
+  // Make completely new half
+  for(int i = 0; i < scenes.size()/2; i++){
+    SnakeScene newScene = new SnakeScene(); // Random network snakes
+    newScenes.add(newScene);
+  }
+
+  // Reset evolution and start it
+  scenes = newScenes;
+}
+
+void drawDebugTextEvolution(){
+  TextBox t = new TextBox(20, 23, 19);
+  t.addText("Framerate: " + (int)frameRate);
+  t.addText("Pop Size: " + POPULATION_SIZE);
+  t.addText("Generation: " + currentGeneration);
+  t.addText("PrevBestSnake.score: "+followingBestScene.score);
+  t.addText("PrevBestSnake.health: "+followingBestScene.healthTicks);
+  t.addText("PrevBestSnake.isDead: "+followingBestScene.gameover);
+  fill(0, 0, 90, 90);
+  t.draw();
 }
 
 void drawDebugTextScene(SnakeScene scene){

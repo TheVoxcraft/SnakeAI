@@ -11,7 +11,7 @@ class Snake{
   PVector emptyTailBlockPos;
   ArrayList<TailBlock> snakeBlocks = new ArrayList<>();
 
-  float snakeAlpha = 60;
+  float snakeAlpha = 24;
 
   Snake(int x, int y){
     position.set(x, y);
@@ -21,7 +21,9 @@ class Snake{
   }
 
   Snake(int x, int y, Network newBrain){
-    Snake(x, y);
+    position.set(x, y);
+    snakeBlocks.add(new TailBlock(position, 0, -1));
+    col = color(random(100), 80, 80, snakeAlpha);
     brain = newBrain;
   }
 

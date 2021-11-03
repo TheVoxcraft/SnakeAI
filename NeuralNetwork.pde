@@ -1,8 +1,8 @@
 class Network{
   
   int in_size = 8;
-  int l1_size = 12 + 1; // + 1 bias
-  int l2_size = 12 + 1; // + 1 bias
+  int l1_size = 20 + 1; // + 1 bias
+  int l2_size = 20 + 1; // + 1 bias
   int out_size = 4;
   
   float[] in = new float[in_size];
@@ -106,7 +106,7 @@ class Network{
   }
   
   float activation(float x){
-    return tanh(x);
+    return RELU(x);
   }
   
   float RELU(float x){
