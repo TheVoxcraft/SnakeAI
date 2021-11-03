@@ -7,18 +7,19 @@ int MAX_BOARD_WIDTH;
 int MAX_BOARD_HEIGHT;
 
 float SNAKE_UPDATE_RATE = 60; // snake updates per second
-int BATCH_SNAKE_UPDATES = 3;
+int BATCH_SNAKE_UPDATES = 10;
 float elapsedTimeSinceUpdate = Float.MAX_VALUE;
 int currentGeneration = 0;
 
 SnakeScene followingBestScene;
 
 boolean DEBUGGING = true;
+Graph debugBestScoreGraph;
 
 ArrayList<SnakeScene> scenes = new ArrayList<>();
 
 void setup(){
-  frameRate(90);
+  frameRate(100);
   size(800, 800);
   colorMode(HSB, 100);
   MAX_BOARD_WIDTH = (int) width / GRID_SIZE;
@@ -30,6 +31,8 @@ void setup(){
 
   followingBestScene = scenes.get(0);
   followingBestScene.agent.col = color(25, 100, 100, 100);
+
+  debugBestScoreGraph = new Graph(0);
 }
 
 void draw(){
@@ -50,6 +53,7 @@ void draw(){
   
   if(DEBUGGING){
     drawDebugTextEvolution();
+    drawDebugScoreGraph();
     // drawDebugText(scene);
   }
 }
@@ -81,6 +85,7 @@ void nextGeneration(){
   Collections.reverse(scenes);
 
   println("G"+currentGeneration+" - Best score: "+scenes.get(0).finalScore);
+  debugBestScoreGraph.add(scenes.get(0).finalScore);
 
   // Make new population with best half of population (Reproduction & TODO: Crossover)
   ArrayList<SnakeScene> newScenes = new ArrayList<>();
@@ -101,6 +106,10 @@ void nextGeneration(){
 
   // Reset evolution and start it
   scenes = newScenes;
+}
+
+void drawDebugScoreGraph(){
+   debugBestScoreGraph.draw();
 }
 
 void drawDebugTextEvolution(){
