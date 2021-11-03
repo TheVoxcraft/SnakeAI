@@ -1,9 +1,9 @@
 class Network{
   
-  int in_size = 3; // 
-  int l1_size = 20 + 1; // + 1 bias
-  int l2_size = 20 + 1; // + 1 bias
-  int out_size = 1; // 
+  int in_size = 8;
+  int l1_size = 12 + 1; // + 1 bias
+  int l2_size = 12 + 1; // + 1 bias
+  int out_size = 4;
   
   float[] in = new float[in_size];
   float[] l1 = new float[l1_size];
@@ -14,7 +14,7 @@ class Network{
   float[][] l1_l2 = new float[l1_size][l2_size];
   float[][] l2_out = new float[l2_size][out_size];
   
-  float muationRate = .05; // ADD THIS LATER!
+  float muationRate = .05;
   
   private void randomizeWeights(){
     for(int i=0; i < in_size; i++){
@@ -40,9 +40,9 @@ class Network{
   l2[l2_size-1] = 1;
   }
   
-  float[] run(float[] inputs){
+  float[] infer(float[] inputs){
     // Insert inputs
-    for(int i=0; i < in_size-1; i++){
+    for(int i=0; i < in_size; i++){
       in[i] = inputs[i];
     }
     
@@ -79,21 +79,21 @@ class Network{
     for(int i=0; i < in_size; i++){
       for(int j=0; j < l1_size; j++){
         if(random(0.0, 1.0) <= muationRate){
-          child.in_l1[i][j] = in_l1[i][j]+random(-1.0, 1.0); //print("m");
+          child.in_l1[i][j] = in_l1[i][j]+random(-1.0, 1.0); 
         }
       }
     }
     for(int i=0; i < l1_size; i++){
       for(int j=0; j < l2_size; j++){
         if(random(0.0, 1.0) <= muationRate){
-          child.l1_l2[i][j] = l1_l2[i][j]+random(-1.0, 1.0);//print("m");
+          child.l1_l2[i][j] = l1_l2[i][j]+random(-1.0, 1.0);
         }
       }
     }
     for(int i=0; i < l2_size; i++){
       for(int j=0; j < out_size; j++){
         if(random(0.0, 1.0) <= muationRate){
-          child.l2_out[i][j] = l2_out[i][j]+random(-1.0, 1.0);//print("m");
+          child.l2_out[i][j] = l2_out[i][j]+random(-1.0, 1.0);
         }
       }
     }
