@@ -1,6 +1,6 @@
 import java.util.*;
 
-int POPULATION_SIZE = 300;
+int POPULATION_SIZE = 1000;
 
 int GRID_SIZE = 20;
 int MAX_BOARD_WIDTH;
@@ -8,6 +8,7 @@ int MAX_BOARD_HEIGHT;
 
 float SNAKE_UPDATE_RATE = 60; // snake updates per second
 int BATCH_SNAKE_UPDATES = 10;
+
 float elapsedTimeSinceUpdate = Float.MAX_VALUE;
 int currentGeneration = 0;
 
@@ -16,7 +17,15 @@ SnakeScene followingBestScene;
 boolean DEBUGGING = true;
 Graph debugBestScoreGraph;
 Graph debugAvgScoreGraph;
-String useMode = "Default";
+UseMode useMode = UseMode.Default;
+String useModeText = "Default";
+
+public enum UseMode {
+  Default,
+  Showcase,
+  Follow,
+  Hypertraining
+}
 
 ArrayList<SnakeScene> scenes = new ArrayList<>();
 
@@ -41,24 +50,41 @@ void setup(){
 void draw(){
   background(11);
 
-  drawAllScenes();
-
-  if(elapsedTimeSinceUpdate >= 1/SNAKE_UPDATE_RATE || SNAKE_UPDATE_RATE >= 60){
-    for(int i = 0; i < BATCH_SNAKE_UPDATES; i++){
-      updateAllScenes();
+  if(useMode == UseMode.Follow){
+    while(followingBestScene.gameover){
+      update();
     }
-    elapsedTimeSinceUpdate = 0;
+    followingBestScene.draw();
   } else {
-    float dt = 60.0/frameRate;
-    elapsedTimeSinceUpdate += dt/60.0;
+    drawAllScenes();
   }
 
   
-  if(DEBUGGING){
-    drawDebugTextEvolution();
-    drawDebugScoreGraph();
-    // drawDebugText(scene);
+  update(); // Code for updating all scenes
+  
+  if(useMode == UseMode.Hypertraining){
+    useModeText = "Hypertraining ("+(int)(frameRate*BATCH_SNAKE_UPDATES)+")";
+    if(frameRate > 50) BATCH_SNAKE_UPDATES += 5;
+    if(frameRate <= 45) BATCH_SNAKE_UPDATES -= 1;
   }
+
+  if(DEBUGGING){
+    drawDebugScoreGraph();
+    drawDebugTextEvolution();
+    drawDebugTextBestSnake();
+  }
+}
+
+void update(){
+  if(elapsedTimeSinceUpdate >= 1/SNAKE_UPDATE_RATE || SNAKE_UPDATE_RATE >= 60){
+      for(int i = 0; i < BATCH_SNAKE_UPDATES; i++){
+        updateAllScenes();
+      }
+      elapsedTimeSinceUpdate = 0;
+    } else {
+      float dt = 60.0/frameRate;
+      elapsedTimeSinceUpdate += dt/60.0;
+    }
 }
 
 void drawAllScenes(){
@@ -87,7 +113,7 @@ void nextGeneration(){
   Collections.sort(scenes); // Java 8 Alternative : scenes.sort(Comparator.comparing(SnakeScene::finalScore).reversed());
   Collections.reverse(scenes);
 
-  println("G"+currentGeneration+" - Best score: "+scenes.get(0).finalScore);
+  //println("G"+currentGeneration+" - Best score: "+scenes.get(0).finalScore);
   debugBestScoreGraph.add(scenes.get(0).finalScore);
 
   // Make new population with best half of population (Reproduction & TODO: Crossover)
@@ -101,10 +127,11 @@ void nextGeneration(){
     newScenes.add(newScene);
   }
   followingBestScene = newScenes.get(0); // Gets best snake from previous generation
-  followingBestScene.agent.col = color(66, 100, 100, 100);
+  followingBestScene.agent.col = color(34, 100, 100, 100);
+  followingBestScene.agent.isFollowed = true;
   
-  float avgScore = totalScore/(POPULATION_SIZE*.5);
-  println("Avg: "+avgScore);
+  float avgScore = totalScore/(POPULATION_SIZE/2);
+  //println("Avg: "+avgScore);
   debugAvgScoreGraph.add(avgScore);
 
   // Make completely new half
@@ -123,17 +150,26 @@ void drawDebugScoreGraph(){
 }
 
 void drawDebugTextEvolution(){
-  TextBox t = new TextBox(20, 23, 19);
+  TextBox t = new TextBox(20, 23, 17);
   t.addText("Framerate: " + (int)frameRate);
   t.addText("Pop Size: " + POPULATION_SIZE);
   t.addText("Generation: " + currentGeneration);
-  t.addText("PrevBestSnake.score: "+followingBestScene.score);
-  t.addText("PrevBestSnake.health: "+followingBestScene.healthTicks);
-  t.addText("PrevBestSnake.isDead: "+followingBestScene.gameover);
-  t.addText("Use Mode: "+useMode);
+  t.addText("Use Mode: "+useModeText);
   fill(0, 0, 90, 90);
   t.draw();
 }
+
+void drawDebugTextBestSnake(){
+  TextBox t = new TextBox(20, 100, 17);
+  t.addText("Follow.finalScore: "+followingBestScene.finalScore);
+  t.addText("Follow.health: "+followingBestScene.healthTicks);
+  t.addText("Follow.isDead: "+followingBestScene.gameover);
+  t.addText("Follow.inferenceInput: " + Arrays.toString(followingBestScene.agent.sensors));
+  t.addText("Follow.inferenceOutput: " + Arrays.toString(followingBestScene.agent.debug_lastInferOut));
+  fill(0, 0, 80, 70);
+  t.draw();
+}
+
 
 void drawDebugTextScene(SnakeScene scene){
   TextBox t = new TextBox(20, 23, 19);
@@ -150,18 +186,27 @@ void drawDebugTextScene(SnakeScene scene){
 
 void keyPressed(){
   if (key == 'a'){
-    useMode = "Default";
+    useMode = UseMode.Default;
+    useModeText = "Default";
     SNAKE_UPDATE_RATE = 60;
     BATCH_SNAKE_UPDATES = 1;
   }
   if(key == 's'){
-    useMode = "Showcase";
+    useMode = UseMode.Showcase;
+    useModeText = "Showcase";
     SNAKE_UPDATE_RATE = 25;
     BATCH_SNAKE_UPDATES = 1;
   }
+  if(key == 'f'){
+    useMode = UseMode.Follow;
+    useModeText = "Following";
+    SNAKE_UPDATE_RATE = 30;
+    BATCH_SNAKE_UPDATES = 1;
+  }
   if (key == 'd'){
-    useMode = "Hypertraining";
+    useMode = UseMode.Hypertraining;
+    useModeText = "Hypertraining ("+BATCH_SNAKE_UPDATES+")";
     SNAKE_UPDATE_RATE = 60;
-    BATCH_SNAKE_UPDATES = 60;
+    BATCH_SNAKE_UPDATES = 30;
   }
 }

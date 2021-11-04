@@ -55,6 +55,7 @@ class SnakeScene implements Comparable<SnakeScene>{
             agent.update();
             checkIfAgentScored();
             checkIfAgentCollided();
+            calculateFinalScore();
             if(healthTicks <= 0){
                 gameover = true;
             }
@@ -67,7 +68,7 @@ class SnakeScene implements Comparable<SnakeScene>{
         if(agent.position.dist(foodPos) < 0.001){
             randomizeFood();
             score++;
-            healthTicks += 150;
+            healthTicks += 200;
             agent.extendTail();
         }
     }
@@ -86,7 +87,7 @@ class SnakeScene implements Comparable<SnakeScene>{
     }
 
     void calculateFinalScore(){
-        finalScore = pow(2*score, 2) + ticks/100f;
+        finalScore = 2*score*score + ticks/10f;
     }
 
     @Override

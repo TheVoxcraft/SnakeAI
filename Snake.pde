@@ -13,6 +13,10 @@ class Snake{
 
   float snakeAlpha = 24;
 
+  boolean isFollowed = false;
+
+  float[] debug_lastInferOut = new float[] {0f,0f,0f,0f};
+
   Snake(int x, int y){
     position.set(x, y);
     snakeBlocks.add(new TailBlock(position, 0, -1));
@@ -77,13 +81,16 @@ class Snake{
     // Set DistToObstacle(4)
     float[] distToObs = new float[4];
     int count = 0;
-    for(int i = -1; i < 1; i+=2){
-      for(int j = -1; j < 1; j+=2){
+    for(int i = -1; i <= 1; i++){
+      for(int j = -1; j <= 1; j++){
+        if(abs(i) == abs(j) && abs(i) == 1) continue;
+        if(i == j && i == 0) continue;
         int d = 1;
         while(!isObstacle((int)position.x+(i * d), (int)position.y+(j * d))){
           d++;
           if(d > 40) break;
         }
+        
         distToObs[count] = d / 40f;
         count++;
       }
@@ -103,11 +110,12 @@ class Snake{
     sensors[10] = position.dist(fruit)/56f;
 
     // Set snake size
-    sensors[11] = snakeBlocks.size() / 20f;
+    sensors[11] = snakeBlocks.size() / 10f;
   }
 
   void decide(){
     float[] out = brain.infer(sensors);
+    debug_lastInferOut = out;
     int dirType = 0;
     float max = 0;
     for(int i = 0; i < out.length; i++){
@@ -123,7 +131,7 @@ class Snake{
     if(dirType == 2) nd.set(0, 1);
     if(dirType == 3) nd.set(0, -1);
 
-    this.direction.set(nd);
+    changeDirection((int)nd.x, (int)nd.y);
   }
 
   void update(){

@@ -1,8 +1,8 @@
 class Network{
   
   int in_size = 8;
-  int l1_size = 20 + 1; // + 1 bias
-  int l2_size = 20 + 1; // + 1 bias
+  int l1_size = 10 + 1; // + 1 bias
+  int l2_size = 10 + 1; // + 1 bias
   int out_size = 4;
   
   float[] in = new float[in_size];
@@ -14,22 +14,22 @@ class Network{
   float[][] l1_l2 = new float[l1_size][l2_size];
   float[][] l2_out = new float[l2_size][out_size];
   
-  float muationRate = .05;
+  float mutationRate = 0.05;
   
   private void randomizeWeights(){
     for(int i=0; i < in_size; i++){
       for(int j=0; j < l1_size; j++){
-        in_l1[i][j] = random(-1.0, 1.0);
+        in_l1[i][j] = random(0.0, 1.0);
       }
     }
     for(int i=0; i < l1_size; i++){
       for(int j=0; j < l2_size; j++){
-        l1_l2[i][j] = random(-1.0, 1.0);
+        l1_l2[i][j] = random(0.0, 1.0);
       }
     }
     for(int i=0; i < l2_size; i++){
       for(int j=0; j < out_size; j++){
-        l2_out[i][j] = random(-1.0, 1.0);
+        l2_out[i][j] = random(0.0, 1.0);
       }
     }
   }
@@ -39,6 +39,7 @@ class Network{
   l1[l1_size-1] = 1;
   l2[l2_size-1] = 1;
   }
+
   
   float[] infer(float[] inputs){
     // Insert inputs
@@ -47,27 +48,35 @@ class Network{
     }
     
     // Feed forward
+
     for(int i=0; i < in_size; i++){
       for(int j=0; j < l1_size; j++){
-        l1[j] += in[i]*in_l1[i][j];
+        l1[j] += in[i] * in_l1[i][j];
       }
     }
+
     for(int i=0; i < l1_size; i++){
-      l1[i] = activation(l1[i]);
-      for(int j=0; j < l2_size; j++){
-        l2[j] += l1[i]*l1_l2[i][j];
-      }
-      
+        l1[i] = activation(l1[i]);
     }
+
+    for(int i=0; i < l1_size; i++){
+      for(int j=0; j < l2_size; j++){
+        l2[j] += l1[i] * l1_l2[i][j];
+      }
+    }
+
+    for(int i=0; i < l1_size; i++){
+        l2[i] = activation(l2[i]);
+    }
+
     for(int i=0; i < l2_size; i++){
-      l2[i] = activation(l2[i]);
       for(int j=0; j < out_size; j++){
-        out[j] += l2[i]*l2_out[i][j];
+        out[j] += l2[i] * l2_out[i][j];
       }
     }
     
     for(int j=0; j < out_size; j++){
-        out[j] = tanh(out[j]);
+        out[j] = RELU(out[j]);
     }
     
     return out;
@@ -78,22 +87,22 @@ class Network{
     
     for(int i=0; i < in_size; i++){
       for(int j=0; j < l1_size; j++){
-        if(random(0.0, 1.0) <= muationRate){
-          child.in_l1[i][j] = in_l1[i][j]+random(-1.0, 1.0); 
+        if(random(0.0, 1.0) < mutationRate){
+          child.in_l1[i][j] = random(0.0, 1.0); 
         }
       }
     }
     for(int i=0; i < l1_size; i++){
       for(int j=0; j < l2_size; j++){
-        if(random(0.0, 1.0) <= muationRate){
-          child.l1_l2[i][j] = l1_l2[i][j]+random(-1.0, 1.0);
+        if(random(0.0, 1.0) < mutationRate){
+          child.l1_l2[i][j] = random(0.0, 1.0);
         }
       }
     }
     for(int i=0; i < l2_size; i++){
       for(int j=0; j < out_size; j++){
-        if(random(0.0, 1.0) <= muationRate){
-          child.l2_out[i][j] = l2_out[i][j]+random(-1.0, 1.0);
+        if(random(0.0, 1.0) < mutationRate){
+          child.l2_out[i][j] = random(0.0, 1.0);
         }
       }
     }
@@ -106,7 +115,7 @@ class Network{
   }
   
   float activation(float x){
-    return RELU(x);
+    return sigmoid(x);
   }
   
   float RELU(float x){
