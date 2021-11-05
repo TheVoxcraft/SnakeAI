@@ -2,7 +2,7 @@ class Snake{
 
   color col;
 
-  float[] sensors = new float[14]; // Direction(4), DistToObstacle(4), VectorToFruit(2), DistToFruit(1), SnakeSize(1), VectorPosition(2)
+  float[] sensors = new float[14+2]; // Direction(4), DistToObstacle(4), VectorToFruit(2), DistToFruit(1), SnakeSize(1), VectorPosition(2), Mem(2)
   Network brain;
   PVector position = new PVector(10,10);
   PVector actualDirection = new PVector(0, 0);
@@ -14,6 +14,8 @@ class Snake{
   float snakeAlpha = 24;
 
   boolean isFollowed = false;
+
+  float[] memory = new float[] {0f,0f};
 
   float[] debug_lastInferOut = new float[] {0f,0f,0f,0f};
 
@@ -117,6 +119,10 @@ class Snake{
     // Set Vector Pos
     sensors[12] = position.x / MAX_BOARD_WIDTH;
     sensors[13] = position.y / MAX_BOARD_HEIGHT;
+
+    // Memory 
+    sensors[14] = memory[0];
+    sensors[15] = memory[1];
   }
 
   void decide(){
@@ -124,12 +130,15 @@ class Snake{
     debug_lastInferOut = out;
     int dirType = 0;
     float max = 0;
-    for(int i = 0; i < out.length; i++){
+    for(int i = 0; i < 4; i++){
       if(out[i] > max){
         dirType = i;
         max = out[i];
       }
     }
+
+    memory[0] = out[4];
+    memory[1] = out[5];
 
     PVector nd = new PVector(0, 0);
     if(dirType == 0) nd.set(1, 0);

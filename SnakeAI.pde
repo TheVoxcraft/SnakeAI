@@ -1,6 +1,6 @@
 import java.util.*;
 
-int POPULATION_SIZE = 1000;
+int POPULATION_SIZE = 2000;
 
 int GRID_SIZE = 16;
 int MAX_BOARD_WIDTH;
@@ -46,8 +46,8 @@ void setup(){
   followingBestScene = scenes.get(0);
   followingBestScene.agent.col = color(25, 100, 100, 100);
 
-  debugBestScoreGraph = new Graph(0, 90, 0);
-  debugAvgScoreGraph = new Graph(0, 90, 30);
+  debugBestScoreGraph = new Graph(10, 90, 0);
+  debugAvgScoreGraph = new Graph(10, 90, 30);
   debugAvgScoreGraph.link(debugBestScoreGraph);
 }
 
@@ -140,8 +140,8 @@ void nextGeneration(){
   float avgScore = totalScore/(POPULATION_SIZE*.2);
   debugAvgScoreGraph.add(avgScore);
 
-  //println("G"+currentGeneration+" - Best score: "+scenes.get(0).finalScore);
-  //println("Avg: "+avgScore);
+  print("G"+currentGeneration+" -- Best score: "+scenes.get(0).finalScore);
+  println(" - Avg: "+avgScore);
 
   // Make completely new half
   for(int i = 0; i < scenes.size()*0.6; i++){
