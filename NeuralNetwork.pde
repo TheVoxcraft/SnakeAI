@@ -22,6 +22,7 @@ class Network{
     weights_ho.randomize();
 
     // TODO: Add bias
+    // TODO: Add Reproduce function with mutation
   }
   
   float[] infer(float[] finputs){

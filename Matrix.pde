@@ -30,7 +30,7 @@ class Matrix {
         float[] array = new float[this.rows * this.cols];
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-                array[i*(this.cols-1)+j] = data[i][j];
+                array[i*(this.cols)+j] = data[i][j];
             }
         }
         return array;
