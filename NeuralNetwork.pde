@@ -1,12 +1,12 @@
 MatrixUtils mxu = new MatrixUtils();
 class Network{
   
-  int in_size = 14+2;
-  int h1_size = 14;
-  int h2_size = 12;
-  int out_size = 4+2;
+  int in_size = 16;
+  int h1_size = 32;
+  int h2_size = 32;
+  int out_size = 6;
   
-  float MUTATION_RATE = 0.05;
+  float MUTATION_RATE = 0.015;
   
   Matrix weights_ih;
   Matrix weights_ho;

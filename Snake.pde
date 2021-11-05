@@ -2,7 +2,7 @@ class Snake{
 
   color col;
 
-  float[] sensors = new float[14+2]; // Direction(4), DistToObstacle(4), VectorToFruit(2), DistToFruit(1), SnakeSize(1), VectorPosition(2), Mem(2)
+  float[] sensors = new float[16]; // Direction(4), DistToObstacle(4), VectorToFruit(2), DistToFruit(1), SnakeSize(1), VectorPosition(2), Mem(2)
   Network brain;
   PVector position = new PVector(10,10);
   PVector actualDirection = new PVector(0, 0);
@@ -60,9 +60,9 @@ class Snake{
     if(x > MAX_BOARD_WIDTH || y > MAX_BOARD_HEIGHT){
         return true;
     }
-    if(isCollidedWithSelf(new PVector(x, y))){
-        return true;
-    }
+    //if(isCollidedWithSelf(new PVector(x, y))){
+    //    return true;
+    //}
     return false;
   }
 
@@ -74,7 +74,7 @@ class Snake{
       sensors[i] = 0f;
     }
 
-    // Set direction
+    // Direction
     PVector ad = actualDirection;
     if(ad.x == 1 && ad.y == 0)  sensors[0] = 1;
     if(ad.x == -1 && ad.y == 0) sensors[1] = 1;
@@ -82,7 +82,7 @@ class Snake{
     if(ad.x == 0 && ad.y == -1) sensors[3] = 1;
 
 
-    // Set DistToObstacle(4)
+    // DistToObstacle(4)
     float[] distToObs = new float[4];
     int count = 0;
     for(int i = -1; i <= 1; i++){
@@ -95,7 +95,7 @@ class Snake{
           if(d > 40) break;
         }
         
-        distToObs[count] = d / 40f;
+        distToObs[count] = 1 - (d / 40f);
         count++;
       }
     }
@@ -104,19 +104,19 @@ class Snake{
     sensors[6] = distToObs[2];
     sensors[7] = distToObs[3];
 
-    // Set vector to fruit
+    // Vector to fruit
     PVector vecToFruit = new PVector(position.x-fruit.x, position.y-fruit.y);
     vecToFruit.normalize();
     sensors[8] = (vecToFruit.x+1)/2;
     sensors[9] = (vecToFruit.y+1)/2;
 
-    // Set dist to fruit
+    // dist to fruit
     sensors[10] = position.dist(fruit)/56f;
 
-    // Set snake size
+    // snake size
     sensors[11] = snakeBlocks.size() / 10f;
 
-    // Set Vector Pos
+    // Vector Pos
     sensors[12] = position.x / MAX_BOARD_WIDTH;
     sensors[13] = position.y / MAX_BOARD_HEIGHT;
 

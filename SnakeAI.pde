@@ -1,6 +1,6 @@
 import java.util.*;
 
-int POPULATION_SIZE = 2000;
+int POPULATION_SIZE = 5000;
 
 int GRID_SIZE = 16;
 int MAX_BOARD_WIDTH;
@@ -71,9 +71,9 @@ void draw(){
   if(useMode == UseMode.Hypertraining){
     if(frameCount % 6 == 0) avgFrameRate = 60;
     avgFrameRate = (avgFrameRate+frameRate)/2;
-    useModeText = "Hypertraining ("+(int)(avgFrameRate*BATCH_SNAKE_UPDATES)+")";
+    useModeText = "Hypertraining ("+(int)(avgFrameRate*BATCH_SNAKE_UPDATES)+" steps)";
     if(avgFrameRate >= 55) BATCH_SNAKE_UPDATES += 5;
-    if(avgFrameRate <= 50 && BATCH_SNAKE_UPDATES > 10) BATCH_SNAKE_UPDATES -= 1;
+    if(avgFrameRate <= 50 && BATCH_SNAKE_UPDATES > 100) BATCH_SNAKE_UPDATES -= 1;
   }
 
   if(DEBUGGING){
@@ -129,11 +129,12 @@ void nextGeneration(){
   // Make new population with best half of population (Reproduction & TODO: Crossover)
   ArrayList<SnakeScene> newScenes = new ArrayList<>();
   float totalScore = 0;
-  for(int i = 0; i < scenes.size()*0.2; i++){
+  for(int i = 0; i < scenes.size()*0.3; i++){
     SnakeScene old = scenes.get(i);
     totalScore += old.finalScore;
     Network newBrain = old.agent.brain.Reproduce();
     newScenes.add( new SnakeScene(old.agent.brain) );
+    //newScenes.add( new SnakeScene(newBrain) );
     newScenes.add( new SnakeScene(newBrain) );
     if(i == 9) debugTop10ScoreGraph.add(totalScore/10f);
   }
@@ -147,8 +148,8 @@ void nextGeneration(){
   print("G"+currentGeneration+"  --  Best score: "+scenes.get(0).finalScore);
   println(" - Avg: "+avgScore);
 
-  // Make completely new half
-  for(int i = 0; i < scenes.size()*0.6; i++){
+  // Fill the rest with random snakes
+  while(newScenes.size() < POPULATION_SIZE){
     SnakeScene newScene = new SnakeScene(); // Random network snakes
     newScenes.add(newScene);
   }
