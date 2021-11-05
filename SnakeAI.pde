@@ -1,6 +1,6 @@
 import java.util.*;
 
-int POPULATION_SIZE = 1000;
+int POPULATION_SIZE = 500;
 
 int GRID_SIZE = 20;
 int MAX_BOARD_WIDTH;
@@ -72,6 +72,7 @@ void draw(){
     drawDebugScoreGraph();
     drawDebugTextEvolution();
     drawDebugTextBestSnake();
+    drawDebugSnakeNetwork(followingBestScene.agent.brain);
   }
 }
 
@@ -170,6 +171,22 @@ void drawDebugTextBestSnake(){
   t.draw();
 }
 
+
+void drawDebugSnakeNetwork(Network snakeBrain){
+  int x = 170;
+  int y = 20;
+
+  fill(0,0,100,70);
+  mxu.drawMatrix(snakeBrain.d_prevInput, x, y, 10, 10);
+  mxu.drawMatrix(snakeBrain.d_prevHidden, x+45, y, 10, 10);
+  mxu.drawMatrix(snakeBrain.d_prevOut, x+90, y, 10, 10);
+
+  /* Drawing hidden weights 
+  fill(66,10,100,40);
+  mxu.drawMatrix(snakeBrain.weights_ih, x+40, y, 32, 10);
+  mxu.drawMatrix(snakeBrain.weights_ho, x+120, y+80, 32, 10);
+  */
+}
 
 void drawDebugTextScene(SnakeScene scene){
   TextBox t = new TextBox(20, 23, 19);

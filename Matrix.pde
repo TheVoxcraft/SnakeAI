@@ -12,7 +12,7 @@ class Matrix {
         this.cols = cols;
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-            data[i][j] = 0;
+              data[i][j] = 0;
             }
         }
     }
@@ -21,17 +21,16 @@ class Matrix {
         this.rows = arr.length;
         this.cols = 1;
         data = new float[rows][cols];
-        for (int i = 0; i < cols; ++i){
-            float e = arr[i];
-            data[i][0] = e;
+        for (int i = 0; i < arr.length; ++i){
+            data[i][0] = arr[i];
         }
     }
 
     float[] toArray(){
         float[] array = new float[this.rows * this.cols];
-        for (int i = 0; i < cols; ++i) {
-            for (int j = 0; j < rows; ++j) {
-                array[i*this.cols+j] = data[i][j];
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                array[i*(this.cols-1)+j] = data[i][j];
             }
         }
         return array;
@@ -40,7 +39,7 @@ class Matrix {
     void randomize(){
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-            data[i][j] = random(0.0, 1.0);
+            data[i][j] = random(-1.0, 1.0);
             }
         }
     }
@@ -87,7 +86,7 @@ class Matrix {
 
     @Override
     String toString(){
-        return "Shape{"+cols+", "+rows+"}";
+        return "Shape{"+rows+", "+cols+"}";
     }
 
 }
@@ -95,8 +94,8 @@ class Matrix {
 class MatrixUtils {
     Matrix dot(Matrix A, Matrix B){
       // A: n*m    *    B: m*p
-      if(A.rows != B.rows || A.cols != B.cols){
-        println("Columns and rows of A must match columns and rows of B. - A: "+ A.toString() + ",  B: "+ B.toString());
+      if(A.cols != B.rows){
+        println("Columns of A must match rows of B. - A: "+ A.toString() + ",  B: "+ B.toString());
         return null;
       }
       Matrix n = new Matrix(A.rows, B.cols);
@@ -104,11 +103,21 @@ class MatrixUtils {
         for (int j = 0; j < B.cols; ++j) { // up to p
           float sum = 0;
           for (int k = 0; k < A.cols; ++k) { // up to m
-            sum += A.data[i][k] + B.data[k][j];
+            sum += A.data[i][k] * B.data[k][j];
           }
           n.data[i][j] = sum;
         }
       }
       return n;
+    }
+
+
+    void drawMatrix(Matrix m, int x, int y, int charOffsetX, int charOffsetY){
+      noStroke();
+      for (int i = 0; i < m.rows; ++i) {
+        for (int j = 0; j < m.cols; ++j) {
+          text(m.data[i][j], x+(j*charOffsetX), y+(i*charOffsetY));
+        }
+      }
     }
 }
