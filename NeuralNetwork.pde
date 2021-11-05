@@ -1,137 +1,88 @@
+MatrixUtils mxu = new MatrixUtils();
 class Network{
   
-  int in_size = 8;
-  int l1_size = 10 + 1; // + 1 bias
-  int l2_size = 10 + 1; // + 1 bias
+  int in_size = 12;
+  int h1_size = 12;
+  int h2_size = 6;
   int out_size = 4;
   
-  float[] in = new float[in_size];
-  float[] l1 = new float[l1_size];
-  float[] l2 = new float[l2_size];
-  float[] out = new float[out_size];
+  float MUTATION_RATE = 0.07;
   
-  float[][] in_l1 = new float[in_size][l1_size];
-  float[][] l1_l2 = new float[l1_size][l2_size];
-  float[][] l2_out = new float[l2_size][out_size];
-  
-  float mutationRate = 0.05;
-  
-  private void randomizeWeights(){
-    for(int i=0; i < in_size; i++){
-      for(int j=0; j < l1_size; j++){
-        in_l1[i][j] = random(0.0, 1.0);
-      }
-    }
-    for(int i=0; i < l1_size; i++){
-      for(int j=0; j < l2_size; j++){
-        l1_l2[i][j] = random(0.0, 1.0);
-      }
-    }
-    for(int i=0; i < l2_size; i++){
-      for(int j=0; j < out_size; j++){
-        l2_out[i][j] = random(0.0, 1.0);
-      }
-    }
-  }
-  
-  private void setBias(){
-  in[in_size-1] = 1;
-  l1[l1_size-1] = 1;
-  l2[l2_size-1] = 1;
+  Matrix weights_ih;
+  Matrix weights_ho;
+  Matrix weights_hh;
+
+  Matrix bias_h;
+  Matrix bias_h2;
+  Matrix bias_o;
+
+  Matrix d_prevInput = new Matrix(0,0);
+  Matrix d_prevHidden = new Matrix(0,0);
+  Matrix d_prevOut = new Matrix(0,0);;
+
+  Network(){
+    // Weights
+    weights_ih = new Matrix(h1_size, in_size);
+    weights_hh = new Matrix(h2_size, h1_size);
+    weights_ho = new Matrix(out_size, h2_size);
+    weights_ih.randomize();
+    weights_ho.randomize();
+
+    // Bias
+    bias_h = new Matrix(h1_size, 1);
+    bias_h2 = new Matrix(h2_size, 1);
+    bias_o = new Matrix(out_size, 1);
+    bias_h.randomize();
+    bias_o.randomize();
   }
 
+  Network(Network other){ // Clone network
+    // Weights
+    weights_ih = other.weights_ih.copy();
+    weights_hh = other.weights_hh.copy();
+    weights_ho = other.weights_ho.copy();
+
+    // Bias
+    bias_h = other.bias_h.copy();
+    bias_h2 = other.bias_h2.copy()
+    bias_o = other.bias_o.copy();
+  }
   
-  float[] infer(float[] inputs){
-    // Insert inputs
-    for(int i=0; i < in_size; i++){
-      in[i] = inputs[i];
-    }
-    
+  float[] infer(float[] finputs){
+
     // Feed forward
-
-    for(int i=0; i < in_size; i++){
-      for(int j=0; j < l1_size; j++){
-        l1[j] += in[i] * in_l1[i][j];
-      }
-    }
-
-    for(int i=0; i < l1_size; i++){
-        l1[i] = activation(l1[i]);
-    }
-
-    for(int i=0; i < l1_size; i++){
-      for(int j=0; j < l2_size; j++){
-        l2[j] += l1[i] * l1_l2[i][j];
-      }
-    }
-
-    for(int i=0; i < l1_size; i++){
-        l2[i] = activation(l2[i]);
-    }
-
-    for(int i=0; i < l2_size; i++){
-      for(int j=0; j < out_size; j++){
-        out[j] += l2[i] * l2_out[i][j];
-      }
-    }
+    Matrix inputs = new Matrix(finputs);
     
-    for(int j=0; j < out_size; j++){
-        out[j] = RELU(out[j]);
-    }
-    
-    return out;
+    Matrix hidden = mxu.dot(weights_ih, inputs);
+    hidden.add(bias_h);
+    hidden.mapActivationFunction();
+
+    Matrix hidden2 = mxu.dot(weights_hh, hidden);
+    hidden2.add(bias_h2);
+    hidden2.mapActivationFunction();
+
+    Matrix out = mxu.dot(weights_ho, hidden2);
+    out.add(bias_o);
+    out.mapActivationFunction();
+
+    d_prevInput = inputs;
+    d_prevHidden = hidden;
+    d_prevOut = out;
+    return out.toArray();
   }
   
   Network Reproduce(){
-    Network child = new Network();
-    
-    for(int i=0; i < in_size; i++){
-      for(int j=0; j < l1_size; j++){
-        if(random(0.0, 1.0) < mutationRate){
-          child.in_l1[i][j] = random(0.0, 1.0); 
-        }
-      }
-    }
-    for(int i=0; i < l1_size; i++){
-      for(int j=0; j < l2_size; j++){
-        if(random(0.0, 1.0) < mutationRate){
-          child.l1_l2[i][j] = random(0.0, 1.0);
-        }
-      }
-    }
-    for(int i=0; i < l2_size; i++){
-      for(int j=0; j < out_size; j++){
-        if(random(0.0, 1.0) < mutationRate){
-          child.l2_out[i][j] = random(0.0, 1.0);
-        }
-      }
-    }
+    // TODO: Add crossover (?)
+    Network child = new Network(this);
+
+    mxu.mutateMatrix(child.weights_ih, MUTATION_RATE);
+    mxu.mutateMatrix(child.weights_hh, MUTATION_RATE);
+    mxu.mutateMatrix(child.weights_ho, MUTATION_RATE);
+
+    mxu.mutateMatrix(child.bias_h, MUTATION_RATE);
+    mxu.mutateMatrix(child.bias_h2, MUTATION_RATE);
+    mxu.mutateMatrix(child.bias_o, MUTATION_RATE);
     
     return child;
-  }
-  
-  float tanh(float x){
-    return (float)Math.tanh(x);
-  }
-  
-  float activation(float x){
-    return sigmoid(x);
-  }
-  
-  float RELU(float x){
-    if(x<0){
-      return x*.001;
-    }
-    else{
-      return x;
-    }
-  }
-  
-  float sigmoid(float x){
-   return 1/(1+pow(2.71828182846,-x));
-  }
-  Network(){
-    randomizeWeights();
-    setBias();
   }
 }

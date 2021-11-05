@@ -1,6 +1,6 @@
 import java.util.*;
 
-int POPULATION_SIZE = 1000;
+int POPULATION_SIZE = 500;
 
 int GRID_SIZE = 20;
 int MAX_BOARD_WIDTH;
@@ -19,6 +19,7 @@ Graph debugBestScoreGraph;
 Graph debugAvgScoreGraph;
 UseMode useMode = UseMode.Default;
 String useModeText = "Default";
+boolean isPaused = false;
 
 public enum UseMode {
   Default,
@@ -59,7 +60,6 @@ void draw(){
     drawAllScenes();
   }
 
-  
   update(); // Code for updating all scenes
   
   if(useMode == UseMode.Hypertraining){
@@ -72,10 +72,12 @@ void draw(){
     drawDebugScoreGraph();
     drawDebugTextEvolution();
     drawDebugTextBestSnake();
+    drawDebugSnakeNetwork(followingBestScene.agent.brain);
   }
 }
 
 void update(){
+  if(isPaused) return;
   if(elapsedTimeSinceUpdate >= 1/SNAKE_UPDATE_RATE || SNAKE_UPDATE_RATE >= 60){
       for(int i = 0; i < BATCH_SNAKE_UPDATES; i++){
         updateAllScenes();
@@ -113,7 +115,7 @@ void nextGeneration(){
   Collections.sort(scenes); // Java 8 Alternative : scenes.sort(Comparator.comparing(SnakeScene::finalScore).reversed());
   Collections.reverse(scenes);
 
-  //println("G"+currentGeneration+" - Best score: "+scenes.get(0).finalScore);
+  
   debugBestScoreGraph.add(scenes.get(0).finalScore);
 
   // Make new population with best half of population (Reproduction & TODO: Crossover)
@@ -131,8 +133,10 @@ void nextGeneration(){
   followingBestScene.agent.isFollowed = true;
   
   float avgScore = totalScore/(POPULATION_SIZE/2);
+  debugAvgScoreGraph.add(avgScore * 10);
+
+  //println("G"+currentGeneration+" - Best score: "+scenes.get(0).finalScore);
   //println("Avg: "+avgScore);
-  debugAvgScoreGraph.add(avgScore);
 
   // Make completely new half
   for(int i = 0; i < scenes.size()/2; i++){
@@ -166,10 +170,26 @@ void drawDebugTextBestSnake(){
   t.addText("Follow.isDead: "+followingBestScene.gameover);
   t.addText("Follow.inferenceInput: " + Arrays.toString(followingBestScene.agent.sensors));
   t.addText("Follow.inferenceOutput: " + Arrays.toString(followingBestScene.agent.debug_lastInferOut));
-  fill(0, 0, 80, 70);
+  fill(0, 0, 100, 70);
   t.draw();
 }
 
+
+void drawDebugSnakeNetwork(Network snakeBrain){
+  int x = 190;
+  int y = 20;
+
+  fill(66,10,100,50);
+  mxu.drawMatrix(snakeBrain.d_prevInput, x, y, 10, 10);
+  mxu.drawMatrix(snakeBrain.d_prevHidden, x+45, y, 10, 10);
+  mxu.drawMatrix(snakeBrain.d_prevOut, x+90, y, 10, 10);
+
+  /* Drawing hidden weights 
+  fill(66,10,100,40);
+  mxu.drawMatrix(snakeBrain.weights_ih, x+40, y, 32, 10);
+  mxu.drawMatrix(snakeBrain.weights_ho, x+120, y+80, 32, 10);
+  */
+}
 
 void drawDebugTextScene(SnakeScene scene){
   TextBox t = new TextBox(20, 23, 19);
@@ -208,5 +228,9 @@ void keyPressed(){
     useModeText = "Hypertraining ("+BATCH_SNAKE_UPDATES+")";
     SNAKE_UPDATE_RATE = 60;
     BATCH_SNAKE_UPDATES = 30;
+  }
+
+  if(key == ' '){
+    isPaused = !isPaused;
   }
 }

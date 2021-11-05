@@ -65,6 +65,8 @@ class Snake{
   }
 
   void setInputs(PVector fruit){
+    //TODO: Check that these inputs are correct
+    
     // Reset sensors
     for(int i = 0; i < sensors.length; i++){
       sensors[i] = 0f;
