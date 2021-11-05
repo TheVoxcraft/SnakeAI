@@ -19,6 +19,7 @@ Graph debugBestScoreGraph;
 Graph debugAvgScoreGraph;
 UseMode useMode = UseMode.Default;
 String useModeText = "Default";
+boolean isPaused = false;
 
 public enum UseMode {
   Default,
@@ -59,7 +60,6 @@ void draw(){
     drawAllScenes();
   }
 
-  
   update(); // Code for updating all scenes
   
   if(useMode == UseMode.Hypertraining){
@@ -77,6 +77,7 @@ void draw(){
 }
 
 void update(){
+  if(isPaused) return;
   if(elapsedTimeSinceUpdate >= 1/SNAKE_UPDATE_RATE || SNAKE_UPDATE_RATE >= 60){
       for(int i = 0; i < BATCH_SNAKE_UPDATES; i++){
         updateAllScenes();
@@ -225,5 +226,9 @@ void keyPressed(){
     useModeText = "Hypertraining ("+BATCH_SNAKE_UPDATES+")";
     SNAKE_UPDATE_RATE = 60;
     BATCH_SNAKE_UPDATES = 30;
+  }
+
+  if(key == ' '){
+    isPaused = !isPaused;
   }
 }
