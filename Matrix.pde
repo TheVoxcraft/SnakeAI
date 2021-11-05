@@ -62,36 +62,49 @@ class Matrix {
         }
     }
 
+    void mapActivationFunction2(){
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+            data[i][j] = fast_sigmoid(data[i][j]);
+            }
+        }
+    }
+
     void add(Matrix n){
         if(this.rows != n.rows || this.cols != n.cols) {
           println("Columns and Rows of A must match Columns and Rows of B.'"); return;
         }
         for (int i = 0; i < rows; ++i) {
           for (int j = 0; j < cols; ++j) {
-            data[i][j] = n.data[i][j];
+            data[i][j] += n.data[i][j];
           }
         }
     }
 
     float tanh(float x){
-    return (float)Math.tanh(x);
-  }
+      return (float)Math.tanh(x);
+    }
   
     float activation(float x){
-      return sigmoid(x);
+      return RELU(x);
     }
     
     float RELU(float x){
       if(x<0){
-        return x*.001;
+        return 0; // x*.001
       }
       else{
         return x;
       }
     }
+
+    float fast_sigmoid(float x){
+      return x / (1 + abs(x));
+    }
     
     float sigmoid(float x){
-    return 1/(1+pow(2.71828182846,-x));
+      //return x / (1 + abs(x));
+      return 1/(1+pow(2.71828182846,-x));
     }
 
     @Override

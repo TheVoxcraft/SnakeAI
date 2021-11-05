@@ -2,7 +2,7 @@ import java.util.*;
 
 int POPULATION_SIZE = 1000;
 
-int GRID_SIZE = 30;
+int GRID_SIZE = 16;
 int MAX_BOARD_WIDTH;
 int MAX_BOARD_HEIGHT;
 
@@ -46,8 +46,9 @@ void setup(){
   followingBestScene = scenes.get(0);
   followingBestScene.agent.col = color(25, 100, 100, 100);
 
-  debugBestScoreGraph = new Graph(0);
-  debugAvgScoreGraph = new Graph(30);
+  debugBestScoreGraph = new Graph(0, 90, 0);
+  debugAvgScoreGraph = new Graph(0, 90, 30);
+  debugAvgScoreGraph.link(debugBestScoreGraph);
 }
 
 void draw(){
@@ -65,7 +66,7 @@ void draw(){
   update(); // Code for updating all scenes
   
   if(useMode == UseMode.Hypertraining){
-    if(frameCount % 10 == 0) avgFrameRate = 55;
+    if(frameCount % 6 == 0) avgFrameRate = 60;
     avgFrameRate = (avgFrameRate+frameRate)/2;
     useModeText = "Hypertraining ("+(int)(avgFrameRate*BATCH_SNAKE_UPDATES)+")";
     if(avgFrameRate >= 55) BATCH_SNAKE_UPDATES += 5;
@@ -76,7 +77,7 @@ void draw(){
     drawDebugScoreGraph();
     drawDebugTextEvolution();
     drawDebugTextBestSnake();
-    drawDebugSnakeNetwork(followingBestScene.agent.brain);
+    //drawDebugSnakeNetwork(followingBestScene.agent.brain);
   }
 }
 
@@ -125,25 +126,25 @@ void nextGeneration(){
   // Make new population with best half of population (Reproduction & TODO: Crossover)
   ArrayList<SnakeScene> newScenes = new ArrayList<>();
   float totalScore = 0;
-  for(int i = 0; i < scenes.size()/2; i++){
+  for(int i = 0; i < scenes.size()*0.2; i++){
     SnakeScene old = scenes.get(i);
     totalScore += old.finalScore;
     Network newBrain = old.agent.brain.Reproduce();
-    SnakeScene newScene = new SnakeScene(newBrain);
-    newScenes.add(newScene);
+    newScenes.add( new SnakeScene(old.agent.brain) );
+    newScenes.add( new SnakeScene(newBrain) );
   }
   followingBestScene = newScenes.get(0); // Gets best snake from previous generation
   followingBestScene.agent.col = color(34, 100, 100, 100);
   followingBestScene.agent.isFollowed = true;
   
-  float avgScore = totalScore/(POPULATION_SIZE/2);
-  debugAvgScoreGraph.add(avgScore * 10);
+  float avgScore = totalScore/(POPULATION_SIZE*.2);
+  debugAvgScoreGraph.add(avgScore);
 
   //println("G"+currentGeneration+" - Best score: "+scenes.get(0).finalScore);
   //println("Avg: "+avgScore);
 
   // Make completely new half
-  for(int i = 0; i < scenes.size()/2; i++){
+  for(int i = 0; i < scenes.size()*0.6; i++){
     SnakeScene newScene = new SnakeScene(); // Random network snakes
     newScenes.add(newScene);
   }
@@ -153,15 +154,19 @@ void nextGeneration(){
 }
 
 void drawDebugScoreGraph(){
-   debugBestScoreGraph.draw();
-   debugAvgScoreGraph.draw();
+  TextBox t = new TextBox(width-180, 15, 15);
+  t.addText("scale: " + debugBestScoreGraph.maxValueInData);
+  fill(0, 0, 90, 70);
+  t.draw();
+  debugBestScoreGraph.draw();
+  debugAvgScoreGraph.draw();
 }
 
 void drawDebugTextEvolution(){
-  TextBox t = new TextBox(20, 23, 17);
+  TextBox t = new TextBox(20, 23, 15);
   t.addText("Framerate: " + (int)frameRate);
   t.addText("avgFrameRate: " + (int)avgFrameRate);
-  t.addText("Pop Size: " + POPULATION_SIZE);
+  t.addText("Pop Size: " + scenes.size());
   t.addText("Generation: " + currentGeneration);
   t.addText("Use Mode: "+useModeText);
   fill(0, 0, 90, 90);
@@ -169,13 +174,13 @@ void drawDebugTextEvolution(){
 }
 
 void drawDebugTextBestSnake(){
-  TextBox t = new TextBox(20, 100, 17);
+  TextBox t = new TextBox(20, 100, 15);
   t.addText("Follow.finalScore: "+followingBestScene.finalScore);
   t.addText("Follow.health: "+followingBestScene.healthTicks);
   t.addText("Follow.isDead: "+followingBestScene.gameover);
   t.addText("Follow.inferenceInput: " + Arrays.toString(followingBestScene.agent.sensors));
   t.addText("Follow.inferenceOutput: " + Arrays.toString(followingBestScene.agent.debug_lastInferOut));
-  fill(0, 0, 100, 70);
+  fill(0, 0, 100, 40);
   t.draw();
 }
 
@@ -230,7 +235,7 @@ void keyPressed(){
   }
   if (key == 'd'){
     useMode = UseMode.Hypertraining;
-    useModeText = "Hypertraining ("+BATCH_SNAKE_UPDATES+")";
+    useModeText = "Hypertraining ("+BATCH_SNAKE_UPDATES+" steps)";
     SNAKE_UPDATE_RATE = 60;
     BATCH_SNAKE_UPDATES = 30;
   }

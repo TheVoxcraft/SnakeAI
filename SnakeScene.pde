@@ -6,7 +6,7 @@ class SnakeScene implements Comparable<SnakeScene>{
     int score = 0;
     int ticks = 0;
 
-    int healthTicks = 400;
+    int healthTicks = 250;
 
     Snake agent;
     PVector foodPos = new PVector(10, 30);
@@ -87,7 +87,7 @@ class SnakeScene implements Comparable<SnakeScene>{
     }
 
     void calculateFinalScore(){
-        finalScore = 2*score*score + ticks/10f;
+        finalScore = 8*score*score + ticks/20f;
     }
 
     @Override

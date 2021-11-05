@@ -6,7 +6,7 @@ class Network{
   int h2_size = 6;
   int out_size = 4;
   
-  float MUTATION_RATE = 1.0;
+  float MUTATION_RATE = 0.05;
   
   Matrix weights_ih;
   Matrix weights_ho;
@@ -63,7 +63,7 @@ class Network{
 
     Matrix out = mxu.dot(weights_ho, hidden2);
     out.add(bias_o);
-    out.mapActivationFunction();
+    out.mapActivationFunction2();
 
     d_prevInput = inputs;
     d_prevHidden = hidden;
