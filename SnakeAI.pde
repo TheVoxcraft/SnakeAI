@@ -19,6 +19,7 @@ float avgFrameRate = 60;
 boolean DEBUGGING = true;
 Graph debugBestScoreGraph;
 Graph debugAvgScoreGraph;
+Graph debugTop10ScoreGraph;
 UseMode useMode = UseMode.Default;
 String useModeText = "Default";
 boolean isPaused = false;
@@ -48,7 +49,9 @@ void setup(){
 
   debugBestScoreGraph = new Graph(10, 90, 0);
   debugAvgScoreGraph = new Graph(10, 90, 30);
+  debugTop10ScoreGraph = new Graph(10, 90, 14);
   debugAvgScoreGraph.link(debugBestScoreGraph);
+  debugTop10ScoreGraph.link(debugBestScoreGraph);
 }
 
 void draw(){
@@ -132,6 +135,7 @@ void nextGeneration(){
     Network newBrain = old.agent.brain.Reproduce();
     newScenes.add( new SnakeScene(old.agent.brain) );
     newScenes.add( new SnakeScene(newBrain) );
+    if(i == 9) debugTop10ScoreGraph.add(totalScore/10f);
   }
   followingBestScene = newScenes.get(0); // Gets best snake from previous generation
   followingBestScene.agent.col = color(34, 100, 100, 100);
@@ -140,7 +144,7 @@ void nextGeneration(){
   float avgScore = totalScore/(POPULATION_SIZE*.2);
   debugAvgScoreGraph.add(avgScore);
 
-  print("G"+currentGeneration+" -- Best score: "+scenes.get(0).finalScore);
+  print("G"+currentGeneration+"  --  Best score: "+scenes.get(0).finalScore);
   println(" - Avg: "+avgScore);
 
   // Make completely new half
@@ -160,6 +164,7 @@ void drawDebugScoreGraph(){
   t.draw();
   debugBestScoreGraph.draw();
   debugAvgScoreGraph.draw();
+  debugTop10ScoreGraph.draw();
 }
 
 void drawDebugTextEvolution(){
