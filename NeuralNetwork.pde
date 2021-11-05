@@ -1,12 +1,12 @@
 MatrixUtils mxu = new MatrixUtils();
 class Network{
   
-  int in_size = 12;
+  int in_size = 14;
   int h1_size = 12;
   int h2_size = 6;
   int out_size = 4;
   
-  float MUTATION_RATE = 0.07;
+  float MUTATION_RATE = 1.0;
   
   Matrix weights_ih;
   Matrix weights_ho;
@@ -44,7 +44,7 @@ class Network{
 
     // Bias
     bias_h = other.bias_h.copy();
-    bias_h2 = other.bias_h2.copy()
+    bias_h2 = other.bias_h2.copy();
     bias_o = other.bias_o.copy();
   }
   

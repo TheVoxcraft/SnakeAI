@@ -2,7 +2,7 @@ class Snake{
 
   color col;
 
-  float[] sensors = new float[12]; // Direction(4), DistToObstacle(4), VectorToFruit(2), DistToFruit(1), SnakeSize(1)
+  float[] sensors = new float[14]; // Direction(4), DistToObstacle(4), VectorToFruit(2), DistToFruit(1), SnakeSize(1), VectorPosition(2)
   Network brain;
   PVector position = new PVector(10,10);
   PVector actualDirection = new PVector(0, 0);
@@ -113,6 +113,10 @@ class Snake{
 
     // Set snake size
     sensors[11] = snakeBlocks.size() / 10f;
+
+    // Set Vector Pos
+    sensors[12] = position.x / MAX_BOARD_WIDTH;
+    sensors[13] = position.y / MAX_BOARD_HEIGHT;
   }
 
   void decide(){

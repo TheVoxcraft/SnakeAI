@@ -1,8 +1,8 @@
 import java.util.*;
 
-int POPULATION_SIZE = 500;
+int POPULATION_SIZE = 1000;
 
-int GRID_SIZE = 20;
+int GRID_SIZE = 30;
 int MAX_BOARD_WIDTH;
 int MAX_BOARD_HEIGHT;
 
@@ -13,6 +13,8 @@ float elapsedTimeSinceUpdate = Float.MAX_VALUE;
 int currentGeneration = 0;
 
 SnakeScene followingBestScene;
+
+float avgFrameRate = 60;
 
 boolean DEBUGGING = true;
 Graph debugBestScoreGraph;
@@ -63,9 +65,11 @@ void draw(){
   update(); // Code for updating all scenes
   
   if(useMode == UseMode.Hypertraining){
-    useModeText = "Hypertraining ("+(int)(frameRate*BATCH_SNAKE_UPDATES)+")";
-    if(frameRate > 50) BATCH_SNAKE_UPDATES += 5;
-    if(frameRate <= 45) BATCH_SNAKE_UPDATES -= 1;
+    if(frameCount % 10 == 0) avgFrameRate = 55;
+    avgFrameRate = (avgFrameRate+frameRate)/2;
+    useModeText = "Hypertraining ("+(int)(avgFrameRate*BATCH_SNAKE_UPDATES)+")";
+    if(avgFrameRate >= 55) BATCH_SNAKE_UPDATES += 5;
+    if(avgFrameRate <= 50 && BATCH_SNAKE_UPDATES > 10) BATCH_SNAKE_UPDATES -= 1;
   }
 
   if(DEBUGGING){
@@ -156,6 +160,7 @@ void drawDebugScoreGraph(){
 void drawDebugTextEvolution(){
   TextBox t = new TextBox(20, 23, 17);
   t.addText("Framerate: " + (int)frameRate);
+  t.addText("avgFrameRate: " + (int)avgFrameRate);
   t.addText("Pop Size: " + POPULATION_SIZE);
   t.addText("Generation: " + currentGeneration);
   t.addText("Use Mode: "+useModeText);

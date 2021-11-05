@@ -6,7 +6,7 @@ class SnakeScene implements Comparable<SnakeScene>{
     int score = 0;
     int ticks = 0;
 
-    int healthTicks = 150;
+    int healthTicks = 400;
 
     Snake agent;
     PVector foodPos = new PVector(10, 30);
