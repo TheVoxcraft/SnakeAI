@@ -115,7 +115,7 @@ void nextGeneration(){
   Collections.sort(scenes); // Java 8 Alternative : scenes.sort(Comparator.comparing(SnakeScene::finalScore).reversed());
   Collections.reverse(scenes);
 
-  //println("G"+currentGeneration+" - Best score: "+scenes.get(0).finalScore);
+  
   debugBestScoreGraph.add(scenes.get(0).finalScore);
 
   // Make new population with best half of population (Reproduction & TODO: Crossover)
@@ -133,8 +133,10 @@ void nextGeneration(){
   followingBestScene.agent.isFollowed = true;
   
   float avgScore = totalScore/(POPULATION_SIZE/2);
+  debugAvgScoreGraph.add(avgScore * 10);
+
+  //println("G"+currentGeneration+" - Best score: "+scenes.get(0).finalScore);
   //println("Avg: "+avgScore);
-  debugAvgScoreGraph.add(avgScore);
 
   // Make completely new half
   for(int i = 0; i < scenes.size()/2; i++){
@@ -168,16 +170,16 @@ void drawDebugTextBestSnake(){
   t.addText("Follow.isDead: "+followingBestScene.gameover);
   t.addText("Follow.inferenceInput: " + Arrays.toString(followingBestScene.agent.sensors));
   t.addText("Follow.inferenceOutput: " + Arrays.toString(followingBestScene.agent.debug_lastInferOut));
-  fill(0, 0, 80, 70);
+  fill(0, 0, 100, 70);
   t.draw();
 }
 
 
 void drawDebugSnakeNetwork(Network snakeBrain){
-  int x = 170;
+  int x = 190;
   int y = 20;
 
-  fill(0,0,100,70);
+  fill(66,10,100,50);
   mxu.drawMatrix(snakeBrain.d_prevInput, x, y, 10, 10);
   mxu.drawMatrix(snakeBrain.d_prevHidden, x+45, y, 10, 10);
   mxu.drawMatrix(snakeBrain.d_prevOut, x+90, y, 10, 10);

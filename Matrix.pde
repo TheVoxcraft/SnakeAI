@@ -48,7 +48,7 @@ class Matrix {
         Matrix m = new Matrix(this.rows, this.cols);
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) {
-            m.data[i][j] = data[i][j];
+              m.data[i][j] = data[i][j];
             }
         }
         return m;
@@ -62,6 +62,16 @@ class Matrix {
         }
     }
 
+    void add(Matrix n){
+        if(this.rows != n.rows || this.cols != n.cols) {
+          println("Columns and Rows of A must match Columns and Rows of B.'"); return;
+        }
+        for (int i = 0; i < rows; ++i) {
+          for (int j = 0; j < cols; ++j) {
+            data[i][j] = n.data[i][j];
+          }
+        }
+    }
 
     float tanh(float x){
     return (float)Math.tanh(x);
@@ -117,6 +127,16 @@ class MatrixUtils {
       for (int i = 0; i < m.rows; ++i) {
         for (int j = 0; j < m.cols; ++j) {
           text(m.data[i][j], x+(j*charOffsetX), y+(i*charOffsetY));
+        }
+      }
+    }
+
+    void mutateMatrix(Matrix m, float mutationRate){
+      for (int i = 0; i < m.rows; ++i) {
+        for (int j = 0; j < m.cols; ++j) {
+          if(random(0.0, 1.0) < mutationRate){
+            m.data[i][j] = random(-1.0, 1.0);
+          }
         }
       }
     }
